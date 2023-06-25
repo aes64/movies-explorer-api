@@ -5,7 +5,7 @@ const User = require('../models/user');
 const Constants = require('../utils/constants');
 const NotFoundError = require('../utils/errors/NotFoundError');
 const BadRequestError = require('../utils/errors/BadRequestError');
-const UserExistError = require('../utils/errors/AlreadyExistError');
+const AlreadyExistError = require('../utils/errors/AlreadyExistError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -50,14 +50,14 @@ module.exports.updateProfile = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
         NODE_ENV === 'production' ? JWT_SECRET : 'super-strong-secret',
         { expiresIn: '7d' },
       );
-      res.send({ token });
+      return res.send({ token });
     })
     .catch(next);
 };
@@ -80,7 +80,7 @@ module.exports.createUser = (req, res, next) => {
       }))
     .catch((err) => {
       if (err.code === 11000) {
-        next(new UserExistError(Constants.ALREADY_EXIST));
+        next(new AlreadyExistError(Constants.ALREADY_EXIST));
       } else if (err instanceof mongoose.Error.ValidationError) {
         next(new BadRequestError(Constants.BAD_REQUEST));
       } else {

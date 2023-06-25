@@ -3,7 +3,7 @@ const Movie = require('../models/movie');
 const Constants = require('../utils/constants');
 const NotFoundError = require('../utils/errors/NotFoundError');
 const BadRequestError = require('../utils/errors/BadRequestError');
-const OwnerError = require('../utils/errors/AccessError');
+const AccessError = require('../utils/errors/AccessError');
 
 module.exports.getMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
@@ -53,7 +53,7 @@ module.exports.deleteMovie = async (req, res, next) => {
       const movie = await Movie.findByIdAndRemove(req.params.movieId);
       res.send(movie);
     } else {
-      next(new OwnerError(Constants.ACCESS_DENIED));
+      next(new AccessError(Constants.ACCESS_DENIED));
     }
   } catch (err) {
     if (err instanceof mongoose.Error.CastError) {
