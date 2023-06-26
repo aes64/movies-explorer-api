@@ -39,7 +39,9 @@ module.exports.updateProfile = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
+      if (err.code === 11000) {
+        next(new AlreadyExistError(Constants.ALREADY_EXIST));
+      } else if (err instanceof mongoose.Error.ValidationError) {
         next(new BadRequestError(Constants.BAD_REQUEST));
       } else {
         next(err);

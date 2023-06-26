@@ -1,11 +1,13 @@
 require('dotenv').config();
 const express = require('express');
-const { celebrate, Joi, errors } = require('celebrate');
+const { errors } = require('celebrate');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { rateLimiter } = require('./middlewares/rateLimiter');
+const { validateSignin, validateSignup } = require('./routes/validation');
 
 const { NODE_ENV, MONGO_URL } = process.env;
 const { PORT = 3000 } = process.env;
@@ -18,6 +20,7 @@ app.use(cors());
 
 app.use(express.json());
 app.use(requestLogger);
+app.use(rateLimiter);
 
 app.get('/crash-test', () => {
   setTimeout(() => {
@@ -27,27 +30,13 @@ app.get('/crash-test', () => {
 
 app.post(
   '/signin',
-  celebrate({
-    body: Joi.object().keys({
-      name: Joi.string().min(2).max(30),
-      email: Joi.string().required().email(),
-      password: Joi.string().required(),
-    }),
-  }),
+  validateSignin(),
   login,
 );
 
 app.post(
   '/signup',
-  celebrate({
-    body: Joi.object()
-      .keys({
-        name: Joi.string().min(2).max(30),
-        email: Joi.string().required().email(),
-        password: Joi.string().required(),
-      })
-      .unknown(true),
-  }),
+  validateSignup(),
   createUser,
 );
 
