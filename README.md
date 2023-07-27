@@ -1,3 +1,5 @@
 # movies-explorer-api
-api.aesmovie.students.nom.nomoreparties.sbs
-ip 158.160.102.251
+domen: api.aesmovie.students.nom.nomoreparties.sbs 
+IP 158.160.102.251
+https://api.aesmovie.students.nom.nomoreparties.sbs/
+
